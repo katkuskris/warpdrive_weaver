@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:warp_drive_weaver/models/wif_object.dart';
-import 'package:warp_drive_weaver/models/weaving_section_notifier.dart';
+import 'package:warp_drive_weaver/models/wif_object_section_notifiers/weaving_section_notifier.dart';
 
 
 class WifNotifier extends ChangeNotifier {
@@ -62,7 +62,6 @@ class WifNotifier extends ChangeNotifier {
     // colorPaletteNotifier.updatePalette(_wifObject.colorPalette ?? _defaultColorPalette());
     notifyListeners(); // Notify for the overall change
   }
-
 
   @override
   void dispose() {
