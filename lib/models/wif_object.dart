@@ -1,11 +1,18 @@
 class WifObject {
   final WeavingSection? weavingSection;
+  final WarpSection? warpSection;
 
-  WifObject({this.weavingSection});
+  WifObject({this.weavingSection, this.warpSection});
 
-  WifObject copyWith({WeavingSection? weavingSection}) {
-    return WifObject(weavingSection: weavingSection ?? this.weavingSection);
+  WifObject copyWith({WeavingSection? weavingSection, WarpSection? warpSection}) {
+    return WifObject(weavingSection: weavingSection ?? this.weavingSection, warpSection: warpSection ?? this.warpSection);
   }
+}
+
+enum WarpUnit {
+  decipoints,
+  inches,
+  centimeters,
 }
 
 abstract class WifObjectSection<T> {
@@ -37,6 +44,58 @@ class WeavingSection implements WifObjectSection<WeavingSection> {
       treadles: treadles ?? this.treadles,
       risingShed: risingShed ?? this.risingShed,
       profile: profile ?? this.profile,
+    );
+  }
+}
+
+class WarpSection implements WifObjectSection<WarpSection> {
+  final int threads; // Assuming this is required
+  final int? color;
+  final int? symbol;
+  final int? symbolNumber;
+  final WarpUnit? units;
+  final double? spacing;
+  final double? thickness;
+  final int? spacingZoom;
+  final int? thicknessZoom;
+
+  // Constructor for WarpSection
+  WarpSection({
+    required this.threads,
+    this.color,
+    this.symbol,
+    this.symbolNumber,
+    this.units,
+    this.spacing,
+    this.thickness,
+    this.spacingZoom,
+    this.thicknessZoom,
+  });
+
+  @override
+  WarpSection copyWith({
+    // Parameters should be comma-separated and have types
+    int? threads,
+    int? color,
+    int? symbol,
+    int? symbolNumber,
+    WarpUnit? units,
+    double? spacing,
+    double? thickness,
+    int? spacingZoom,
+    int? thicknessZoom,
+  }) {
+    // Return a new WarpSection instance
+    return WarpSection(
+      threads: threads ?? this.threads,
+      color: color ?? this.color,
+      symbol: symbol ?? this.symbol,
+      symbolNumber: symbolNumber ?? this.symbolNumber,
+      units: units ?? this.units,
+      spacing: spacing ?? this.spacing,
+      thickness: thickness ?? this.thickness,
+      spacingZoom: spacingZoom ?? this.spacingZoom,
+      thicknessZoom: thicknessZoom ?? this.thicknessZoom,
     );
   }
 }
