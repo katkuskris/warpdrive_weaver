@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import 'package:warp_drive_weaver/models/wif_object.dart';
+import 'package:warp_drive_weaver/wif_object.dart';
 
 
 class WeavingSectionNotifier extends ChangeNotifier {

@@ -1,7 +1,7 @@
 import 'package:warp_drive_weaver/app.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:warp_drive_weaver/models/wif_notifier.dart';
+import 'package:warp_drive_weaver/wif_notifier.dart';
 
 void main() {
   runApp(
