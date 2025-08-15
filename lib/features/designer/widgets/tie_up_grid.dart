@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
-import 'package:warp_drive_weaver/wif_notifier.dart';
-import 'package:warp_drive_weaver/models/wif_object_section_notifiers/weaving_section_notifier.dart';
+import 'package:warp_drive_weaver/features/designer/notifiers/wif_notifier.dart';
 
 class TieUpGrid extends StatelessWidget {
   const TieUpGrid({super.key});

@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
-import 'package:warp_drive_weaver/wif_object.dart';
-import 'package:warp_drive_weaver/models/wif_object_section_notifiers/weaving_section_notifier.dart';
+import 'package:warp_drive_weaver/features/designer/notifiers/wif_object_section_notifiers/weaving_section_notifier.dart';
+import 'package:warp_drive_weaver/features/designer/models/wif_object.dart';
 
 
 class WifNotifier extends ChangeNotifier {

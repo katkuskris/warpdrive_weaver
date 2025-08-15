@@ -108,7 +108,7 @@ class WarpSection implements WifObjectSection<WarpSection> {
 }
 
 class WeftSection implements WifObjectSection<WeftSection> {
-  final int threads; // Assuming this is required
+  final int threads;
   final int? color;
   final int? symbol;
   final int? symbolNumber;
@@ -118,7 +118,7 @@ class WeftSection implements WifObjectSection<WeftSection> {
   final int? spacingZoom;
   final int? thicknessZoom;
 
-  // Constructor for WarpSection
+  // Constructor for WeftSection
   WeftSection({
     required this.threads,
     this.color,
@@ -133,7 +133,6 @@ class WeftSection implements WifObjectSection<WeftSection> {
 
   @override
   WeftSection copyWith({
-    // Parameters should be comma-separated and have types
     int? threads,
     int? color,
     int? symbol,
