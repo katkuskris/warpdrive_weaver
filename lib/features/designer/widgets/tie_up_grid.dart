@@ -68,16 +68,6 @@ class TieUpGrid extends StatelessWidget {
       ),
     );
   }
-// Placeholder for fetching/updating tie-up state.
-// You'd integrate this with your actual data model and notifier.
-// bool getTieUpState(int shaftIndex, int treadleIndex) {
-//   // Return the state from your model, e.g., a List<List<bool>>
-//   return false; // Default
-// }
-//
-// void toggleTieUpState(int shaftIndex, int treadleIndex) {
-//   // Update the state in your model and notify listeners.
-// }
 }
 
 

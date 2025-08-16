@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:warp_drive_weaver/navigation/main_app_layout.dart';
+import 'package:warp_drive_weaver/layout/main_app_layout.dart';
 
 class App extends StatelessWidget {
   const App({super.key});
@@ -7,7 +7,7 @@ class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'WarpDrive Weaver',
       theme: ThemeData(primarySwatch: Colors.deepPurple),
       home: const MainAppLayout(),
     );
