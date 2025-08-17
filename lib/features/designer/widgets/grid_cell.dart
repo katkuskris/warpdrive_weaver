@@ -7,19 +7,23 @@ class GridCell extends StatelessWidget {
   final Color cellColor;
   final Color borderColor;
   final bool isInteractive;
+  final double borderWidth = 0.5;
 
   const GridCell({
     super.key,
     this.child,
     this.onTap,
     this.cellColor = Colors.white,
-    this.borderColor = Colors.grey,
+    this.borderColor = Colors.black,
     this.isInteractive = true,
   });
 
   @override
   Widget build(BuildContext context) {
-    BoxDecoration decoration = BoxDecoration(color: cellColor);
+    BoxDecoration decoration = BoxDecoration(
+      color: cellColor,
+      border: Border.all(color: borderColor, width: borderWidth),
+    );
 
     return GestureDetector(
       onTap: isInteractive ? onTap : null,

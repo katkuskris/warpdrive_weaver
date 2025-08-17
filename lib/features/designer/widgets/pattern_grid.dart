@@ -4,31 +4,30 @@ import 'package:warp_drive_weaver/features/designer/notifiers/wif_notifier.dart'
 import 'package:warp_drive_weaver/features/designer/widgets/sized_grid.dart';
 
 
-class TieUpGrid extends StatelessWidget {
-  const TieUpGrid({super.key});
+class PatternGrid extends StatelessWidget {
+  const PatternGrid({super.key});
 
   @override
   Widget build(BuildContext context) {
     final wifNotifier = context.watch<WifNotifier>();
-    final weavingSection = wifNotifier.weavingSectionNotifier.section;
+    final warpSection = wifNotifier.currentWif.warpSection;
+    final weftSection = wifNotifier.currentWif.weftSection;
 
-    if (weavingSection == null) {
+
+    if (warpSection == null || weftSection == null) {
       return const Center(child: Text('Weaving data not available.'));
     }
 
-    final int shaftCount = weavingSection.shafts;
-    final int treadleCount = weavingSection.treadles;
-
-    if (shaftCount <= 0 || treadleCount <= 0) {
+    if (warpSection.threads <= 0 || weftSection.threads <= 0) {
       return const Center(
-        child: Text('Please set a valid number of shafts and treadles.'),
+        child: Text('Please set a valid number of threads.'),
       );
     }
 
     return SizedGrid(
       context: context,
-      rowCount: weavingSection.shafts,
-      columnCount: weavingSection.treadles,
+      rowCount: weftSection.threads,
+      columnCount: warpSection.threads,
     );
   }
 }

@@ -1,14 +1,13 @@
 // lib/widgets/generic_sized_grid.dart
 import 'package:flutter/material.dart';
+import 'package:warp_drive_weaver/features/designer/widgets/grid_cell.dart';
 
-import '../../../../config/app_constants.dart';
+import 'package:warp_drive_weaver/config/app_constants.dart';
 
-Widget buildSizedGrid({
+Widget SizedGrid({
   required BuildContext context,
   required int rowCount,
   required int columnCount,
-  required Widget Function(BuildContext context, int row, int col) cellBuilder,
-  Color gridBorderColor = Colors.black, // Color of the spacing/border lines
 }) {
   if (rowCount <= 0 || columnCount <= 0) {
     return SizedBox.shrink(); // Or some placeholder for an empty grid
@@ -27,8 +26,8 @@ Widget buildSizedGrid({
     width: totalGridWidth,
     height: totalGridHeight,
     child: Container(
+      color: Colors.black,
       padding: const EdgeInsets.all(globalOuterGridBorderWidth), // Creates the outer border frame
-      color: gridBorderColor, // This color shows through the spacing to form grid lines
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween, // Distributes rows, utilizing spacing
         children: List.generate(rowCount, (r) {
@@ -36,7 +35,7 @@ Widget buildSizedGrid({
             mainAxisAlignment: MainAxisAlignment.spaceBetween, // Distributes cells, utilizing spacing
             children: List.generate(columnCount, (c) {
               // The cellBuilder provides the actual GridCellWidget or its content
-              return cellBuilder(context, r, c);
+              return GridCell();
             }),
           );
         }),

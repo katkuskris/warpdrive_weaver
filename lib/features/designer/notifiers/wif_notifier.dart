@@ -29,6 +29,12 @@ class WifNotifier extends ChangeNotifier {
         treadles: 6,
         risingShed: true,
       ),
+      warpSection: WarpSection(
+        threads: 20
+      ),
+      weftSection: WeftSection(
+        threads: 15
+      ),
       // Initialize other sections as needed
     );
   }
