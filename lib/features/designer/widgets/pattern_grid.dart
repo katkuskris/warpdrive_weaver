@@ -24,7 +24,7 @@ class PatternGrid extends StatelessWidget {
       );
     }
 
-    return SizedGrid(
+    return sizedGrid(
       context: context,
       rowCount: weftSection.threads,
       columnCount: warpSection.threads,

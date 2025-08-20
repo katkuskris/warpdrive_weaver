@@ -25,7 +25,7 @@ class TieUpGrid extends StatelessWidget {
       );
     }
 
-    return SizedGrid(
+    return sizedGrid(
       context: context,
       rowCount: weavingSection.shafts,
       columnCount: weavingSection.treadles,

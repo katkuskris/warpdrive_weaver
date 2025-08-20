@@ -1,10 +1,9 @@
-// lib/widgets/generic_sized_grid.dart
 import 'package:flutter/material.dart';
 import 'package:warp_drive_weaver/features/designer/widgets/grid_cell.dart';
 
 import 'package:warp_drive_weaver/config/app_constants.dart';
 
-Widget SizedGrid({
+Widget sizedGrid({
   required BuildContext context,
   required int rowCount,
   required int columnCount,
@@ -13,7 +12,6 @@ Widget SizedGrid({
     return SizedBox.shrink(); // Or some placeholder for an empty grid
   }
 
-  // Calculate total dimensions based on global cell sizes and spacing
   double totalGridWidth = (columnCount * globalCellWidth) +
       ((columnCount - 1).clamp(0, double.infinity) * globalCellSpacing) +
       (2 * globalOuterGridBorderWidth);

@@ -10,28 +10,54 @@ class ShaftCountEditor extends StatefulWidget {
 }
 
 class _ShaftCountEditorState extends State<ShaftCountEditor> {
-  // TextEditingController to manage the TextFormField's state and initial value
   late TextEditingController _shaftCountController;
-  final _formKey = GlobalKey<FormState>(); // For TextFormField validation
+  final _formKey = GlobalKey<FormState>();
+  WifNotifier? _wifNotifier; // Store the notifier instance
 
   @override
   void initState() {
     super.initState();
     _shaftCountController = TextEditingController();
-    // Initialize the controller with the current value from the notifier
-    // Listen to changes in the notifier to update the text field if the value
-    // is changed externally (e.g., by increment/decrement buttons).
-    final wifNotifier = Provider.of<WifNotifier>(context, listen: false);
-    _updateControllerWithValue(wifNotifier.currentWif.weavingSection?.shafts);
+    // Initial value setting is fine here if you ensure _wifNotifier is available
+    // OR delay it to didChangeDependencies after _wifNotifier is set.
+    // For simplicity with current structure, let's keep it here but ensure
+    // _wifNotifier is obtained first in didChangeDependencies.
+  }
 
-    wifNotifier.addListener(_handleWifChanges);
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Obtain the WifNotifier instance here.
+    // This method is called after initState and when dependencies change.
+    final newWifNotifier = Provider.of<WifNotifier>(context, listen: false);
+
+    // If the notifier instance has changed or if it's the first time,
+    // update the listener and the initial controller value.
+    if (newWifNotifier != _wifNotifier) {
+      // Remove listener from the old notifier, if any
+      _wifNotifier?.removeListener(_handleWifChanges);
+
+      _wifNotifier = newWifNotifier; // Store the new instance
+
+      // Add listener to the new notifier
+      _wifNotifier?.addListener(_handleWifChanges);
+
+      // Initialize/update the controller with the current value from the (new) notifier
+      // This ensures that if the widget is rebuilt and gets a new notifier instance,
+      // or on the first build, the text field is correctly initialized.
+      _updateControllerWithValue(_wifNotifier?.currentWif.weavingSection?.shafts);
+    }
   }
 
   void _handleWifChanges() {
-    // This listener ensures the text field updates if the shaft count
-    // is changed by the +/- buttons or programmatically elsewhere.
-    final wifNotifier = Provider.of<WifNotifier>(context, listen: false);
-    final currentShaftCountInNotifier = wifNotifier.currentWif.weavingSection?.shafts;
+    // Crucial: Check if the widget is still mounted before accessing context or state.
+    if (!mounted) {
+      return;
+    }
+
+    // Now it's safer to access the stored _wifNotifier instance.
+    // No need to call Provider.of(context) here anymore.
+    final currentShaftCountInNotifier = _wifNotifier?.currentWif.weavingSection?.shafts;
     final currentShaftCountInField = int.tryParse(_shaftCountController.text);
 
     if (currentShaftCountInNotifier != null &&
@@ -41,22 +67,32 @@ class _ShaftCountEditorState extends State<ShaftCountEditor> {
   }
 
   void _updateControllerWithValue(int? count) {
-    _shaftCountController.text = count?.toString() ?? '0';
+    if (!mounted) return; // Also good practice here for safety
+    final newText = count?.toString() ?? '0';
+    if (_shaftCountController.text != newText) {
+      _shaftCountController.text = newText;
+      // Optionally, only update selection if the widget is focused or text actually changed
+      // to avoid unnecessary cursor jumps if the update is redundant.
+      // _shaftCountController.selection = TextSelection.fromPosition(
+      //     TextPosition(offset: _shaftCountController.text.length));
+    }
   }
-
 
   @override
   void dispose() {
-    // Remove the listener when the widget is disposed
-    Provider.of<WifNotifier>(context, listen: false).removeListener(_handleWifChanges);
+    // Remove the listener from the stored notifier instance
+    _wifNotifier?.removeListener(_handleWifChanges);
     _shaftCountController.dispose();
     super.dispose();
   }
 
   void _submitShaftCount(String value) {
-    if (_formKey.currentState!.validate()) { // Trigger validation
+    if (!mounted) return; // Good practice for safety
+    if (_formKey.currentState!.validate()) {
       final newShaftCount = int.tryParse(value);
-      if (newShaftCount != null) { // Already validated by form validator
+      if (newShaftCount != null) {
+        // Use context.read here as it's a one-time action triggered by user.
+        // Or use the stored _wifNotifier if you prefer.
         context
             .read<WifNotifier>()
             .weavingSectionNotifier
@@ -67,35 +103,32 @@ class _ShaftCountEditorState extends State<ShaftCountEditor> {
 
   @override
   Widget build(BuildContext context) {
-    // Using a Consumer here to get the initial value and for the display text,
-    // but the TextFormField will use its own controller for real-time updates.
-    final wifNotifier = context.watch<WifNotifier>();
-    final int currentShaftCount = wifNotifier.currentWif.weavingSection?.shafts ?? 0;
+    // context.watch is fine here for rebuilding when WifNotifier changes.
+    final wifNotifierFromBuild = context.watch<WifNotifier>();
+    final int currentShaftCount = wifNotifierFromBuild.currentWif.weavingSection?.shafts ?? 0;
 
-    // This ensures that if the widget rebuilds and the controller wasn't updated
-    // by the listener yet (e.g., due to immediate state change elsewhere),
-    // it still reflects the most recent value from the notifier upon rebuild.
-    // However, the listener (_handleWifChanges) is the primary way it stays in sync.
-    if (_shaftCountController.text != currentShaftCount.toString()) {
-      _shaftCountController.text = currentShaftCount.toString();
-      // Move cursor to the end after updating text
+    // Synchronize controller if build happens and listener hasn't caught up or for initial build
+    // This check should ideally be less frequent if _handleWifChanges and initial setup
+    // in didChangeDependencies are robust.
+    final currentControllerText = currentShaftCount.toString();
+    if (_shaftCountController.text != currentControllerText) {
+      _shaftCountController.text = currentControllerText;
       _shaftCountController.selection = TextSelection.fromPosition(
           TextPosition(offset: _shaftCountController.text.length));
     }
 
-
-    return Form( // Wrap with a Form widget for validation
+    return Form(
       key: _formKey,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisSize: MainAxisSize.min, // So the column doesn't take excessive space
+        mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           const Text(
             'Current number of shafts:',
             style: TextStyle(fontSize: 18),
           ),
           Text(
-            '$currentShaftCount', // Display directly from notifier for reactivity
+            '$currentShaftCount',
             style: Theme.of(context)
                 .textTheme
                 .headlineMedium
@@ -107,16 +140,16 @@ class _ShaftCountEditorState extends State<ShaftCountEditor> {
             children: [
               ElevatedButton(
                 onPressed: () {
-                  wifNotifier.weavingSectionNotifier.decrementShaftCount();
-                  // The listener will update the _shaftCountController
+                  // Use the notifier instance obtained from context.watch or context.read
+                  // for actions.
+                  wifNotifierFromBuild.weavingSectionNotifier.decrementShaftCount();
                 },
                 child: const Icon(Icons.remove),
               ),
               const SizedBox(width: 20),
               ElevatedButton(
                 onPressed: () {
-                  wifNotifier.weavingSectionNotifier.incrementShaftCount();
-                  // The listener will update the _shaftCountController
+                  wifNotifierFromBuild.weavingSectionNotifier.incrementShaftCount();
                 },
                 child: const Icon(Icons.add),
               ),
@@ -131,7 +164,7 @@ class _ShaftCountEditorState extends State<ShaftCountEditor> {
           SizedBox(
             width: 150,
             child: TextFormField(
-              controller: _shaftCountController, // Use the controller
+              controller: _shaftCountController,
               textAlign: TextAlign.center,
               keyboardType: TextInputType.number,
               decoration: const InputDecoration(
@@ -150,7 +183,7 @@ class _ShaftCountEditorState extends State<ShaftCountEditor> {
                 if (number < 1) {
                   return 'Min 1';
                 }
-                if (number > 48) { // Example max
+                if (number > 48) {
                   return 'Max 48';
                 }
                 return null;
@@ -163,3 +196,4 @@ class _ShaftCountEditorState extends State<ShaftCountEditor> {
     );
   }
 }
+

@@ -11,7 +11,6 @@ class TreadleGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     final wifNotifier = context.watch<WifNotifier>();
     final weavingSection = wifNotifier.currentWif.weavingSection;
-    final warpSection = wifNotifier.currentWif.warpSection;
     final weftSection = wifNotifier.currentWif.weftSection;
 
 
@@ -25,7 +24,7 @@ class TreadleGrid extends StatelessWidget {
       );
     }
 
-    return SizedGrid(
+    return sizedGrid(
       context: context,
       rowCount: weftSection.threads,
       columnCount: weavingSection.treadles,

@@ -24,7 +24,7 @@ class ThreadingGrid extends StatelessWidget {
       );
     }
 
-    return SizedGrid(
+    return sizedGrid(
       context: context,
       rowCount: weavingSection.shafts,
       columnCount: warpSection.threads,

@@ -13,15 +13,11 @@ class _MainAppLayoutState extends State<MainAppLayout> {
   Widget _buildContentForSelectedIndex(int index) {
     switch (index) {
       case 0: // Corresponds to the first NavigationRailDestination
-        return Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[const DesignerScreen()],
-            ),
-          ),
+      // Remove the unnecessary Center and Column.
+      // Let DesignerScreen directly occupy the space given by the Expanded widget in the body.
+        return const Padding(
+          padding: EdgeInsets.all(16.0), // You can keep padding if you like
+          child: DesignerScreen(),
         );
       case 1:
         return const Center(
