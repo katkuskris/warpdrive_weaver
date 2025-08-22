@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:warp_drive_weaver/features/designer/widgets/horizontal_toolbar.dart';
 import 'package:warp_drive_weaver/features/designer/widgets/pattern_grid.dart';
 import 'package:warp_drive_weaver/features/designer/widgets/shaft_count_editor.dart';
 import 'package:warp_drive_weaver/features/designer/widgets/threading_grid.dart';
 import 'package:warp_drive_weaver/features/designer/widgets/tie_up_grid.dart';
 import 'package:warp_drive_weaver/features/designer/widgets/treadle_grid.dart';
 import 'package:warp_drive_weaver/features/designer/widgets/toolbar.dart';
+import 'package:warp_drive_weaver/features/designer/widgets/stepper_control.dart';
 
 class DesignerScreen extends StatelessWidget {
   const DesignerScreen({super.key});
@@ -28,13 +30,24 @@ class DesignerScreen extends StatelessWidget {
                     CrossAxisAlignment
                         .center, // Center ShaftCountEditor and the grid block
                 children: [
-                  const ShaftCountEditor(),
+                  const StepperControl(),
+                  // const ShaftCountEditor(),
                   const SizedBox(height: gridSpacing),
                   // Horizontal scrolling for the 2x2 grid section
                   SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: Column(
                       children: [
+                        CompactNumberInput(
+                          initialValue: 5,
+                          minValue: 0,
+                          maxValue: 20,
+                          onChanged: (newValue) {
+                            print("Selected value: $newValue");
+                          },
+                          buttonSize: 36, // Example size
+                          spacing: 10,  // Example spacing
+                        ),
                         // First row of the 2x2 grid
                         Row(
                           mainAxisSize:

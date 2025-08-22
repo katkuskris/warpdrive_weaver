@@ -21,7 +21,7 @@ class WeftSectionNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setShaftCount(int newWeftThreadCount) {
+  void setThreadCount(int newWeftThreadCount) {
     if (newWeftThreadCount < 0 || newWeftThreadCount > 48) return;
     _weftSection = _weftSection.copyWith(threads: newWeftThreadCount);
     notifyListeners();

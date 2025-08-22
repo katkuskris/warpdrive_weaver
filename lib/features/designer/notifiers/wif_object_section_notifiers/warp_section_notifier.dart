@@ -21,7 +21,7 @@ class WarpSectionNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setShaftCount(int newWarpThreadCount) {
+  void setThreadCount(int newWarpThreadCount) {
     if (newWarpThreadCount < 0 || newWarpThreadCount > 48) return;
     _warpSection = _warpSection.copyWith(threads: newWarpThreadCount);
     notifyListeners();
