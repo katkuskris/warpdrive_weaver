@@ -13,11 +13,6 @@ class TreadleGrid extends StatelessWidget {
     final weavingSection = wifNotifier.currentWif.weavingSection;
     final weftSection = wifNotifier.currentWif.weftSection;
 
-
-    if (weftSection == null || weavingSection == null) {
-      return const Center(child: Text('Weaving data not available.'));
-    }
-
     if (weavingSection.treadles <= 0 || weftSection.threads <= 0) {
       return const Center(
         child: Text('Please set a valid number of shafts and threads.'),

@@ -13,7 +13,7 @@ class WifNotifier extends ChangeNotifier {
 
   WifNotifier() : _wifObject = _initialWifObject() {
     // Initialize sub-notifiers, passing the relevant part of _wifObject
-    weavingSectionNotifier = WeavingSectionNotifier(_wifObject.weavingSection ?? _defaultWeavingSection());
+    weavingSectionNotifier = WeavingSectionNotifier(_wifObject.weavingSection);
     // colorPaletteNotifier = ColorPaletteNotifier(_wifObject.colorPalette ?? _defaultColorPalette());
 
     // Listen to changes in sub-notifiers to update the main WifObject
@@ -39,11 +39,6 @@ class WifNotifier extends ChangeNotifier {
     );
   }
 
-  static WeavingSection _defaultWeavingSection() { // Helper for default
-    return WeavingSection(shafts: 0, treadles: 0);
-  }
-
-
   WifObject get currentWif => _wifObject;
 
   void _onWeavingSectionChanged() {
@@ -64,7 +59,7 @@ class WifNotifier extends ChangeNotifier {
   void loadNewWif(WifObject newWifObject) {
     _wifObject = newWifObject;
     // Update all sub-notifiers
-    weavingSectionNotifier.updateSection(_wifObject.weavingSection ?? _defaultWeavingSection());
+    weavingSectionNotifier.updateSection(_wifObject.weavingSection);
     // colorPaletteNotifier.updatePalette(_wifObject.colorPalette ?? _defaultColorPalette());
     notifyListeners(); // Notify for the overall change
   }

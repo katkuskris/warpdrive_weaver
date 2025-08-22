@@ -1,9 +1,16 @@
 class WifObject {
-  final WeavingSection? weavingSection;
-  final WarpSection? warpSection;
-  final WeftSection? weftSection;
+  final WeavingSection weavingSection;
+  final WarpSection warpSection;
+  final WeftSection weftSection;
 
-  WifObject({this.weavingSection, this.warpSection, this.weftSection});
+  WifObject({
+    WeavingSection? weavingSection, // Still accept nullable for constructor convenience
+    WarpSection? warpSection,
+    WeftSection? weftSection,
+  })  : weavingSection = weavingSection ?? WeavingSection(shafts: 8, treadles: 10), // Provide default instance
+        warpSection = warpSection ?? WarpSection(threads: 40),         // Provide default instance
+        weftSection = weftSection ?? WeftSection(threads: 30);         // Provide default instance
+
 
   WifObject copyWith({WeavingSection? weavingSection, WarpSection? warpSection, WeftSection? weftSection}) {
     return WifObject(weavingSection: weavingSection ?? this.weavingSection, warpSection: warpSection ?? this.warpSection, weftSection: weftSection ?? this.weftSection);

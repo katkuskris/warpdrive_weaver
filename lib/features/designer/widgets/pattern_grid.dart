@@ -13,11 +13,6 @@ class PatternGrid extends StatelessWidget {
     final warpSection = wifNotifier.currentWif.warpSection;
     final weftSection = wifNotifier.currentWif.weftSection;
 
-
-    if (warpSection == null || weftSection == null) {
-      return const Center(child: Text('Weaving data not available.'));
-    }
-
     if (warpSection.threads <= 0 || weftSection.threads <= 0) {
       return const Center(
         child: Text('Please set a valid number of threads.'),

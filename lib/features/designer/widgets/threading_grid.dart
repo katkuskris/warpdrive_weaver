@@ -13,11 +13,6 @@ class ThreadingGrid extends StatelessWidget {
     final weavingSection = wifNotifier.currentWif.weavingSection;
     final warpSection = wifNotifier.currentWif.warpSection;
 
-
-    if (warpSection == null || weavingSection == null) {
-      return const Center(child: Text('Weaving data not available.'));
-    }
-
     if (weavingSection.shafts <= 0 || warpSection.threads <= 0) {
       return const Center(
         child: Text('Please set a valid number of shafts and threads.'),

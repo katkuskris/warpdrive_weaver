@@ -12,10 +12,6 @@ class TieUpGrid extends StatelessWidget {
     final wifNotifier = context.watch<WifNotifier>();
     final weavingSection = wifNotifier.weavingSectionNotifier.section;
 
-    if (weavingSection == null) {
-      return const Center(child: Text('Weaving data not available.'));
-    }
-
     final int shaftCount = weavingSection.shafts;
     final int treadleCount = weavingSection.treadles;
 
