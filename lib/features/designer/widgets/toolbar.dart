@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 // import 'package:provider/provider.dart'; // Not used in this version of Toolbar yet
 // import 'package:warp_drive_weaver/features/designer/notifiers/wif_notifier.dart'; // Not used
-
-class ToolbarItem {
+class ToolbarItemData {
   final IconData icon;
   final String name;
   final String? label;
   final VoidCallback onPressed;
 
-  ToolbarItem({
+  ToolbarItemData({
     required this.icon,
     required this.name,
     this.label,
@@ -16,111 +15,111 @@ class ToolbarItem {
   });
 }
 
-class Toolbar extends StatelessWidget {
-  final double itemSpacing;
-  final double toolbarHeight; // Added property for height
+// Optional: A dedicated widget to render ToolbarItemData
+// This promotes separation of concerns.
+class ToolbarActionItem extends StatelessWidget {
+  final ToolbarItemData item;
+  final double iconSize;
+  final double labelFontSize;
+  final double itemSpacing; // For consistent padding
 
-  // Made items a parameter for better reusability, but kept your default for now
-  final List<ToolbarItem> items;
-
-  Toolbar({
+  const ToolbarActionItem({
     super.key,
-    List<ToolbarItem>? items, // Allow passing items
+    required this.item,
+    this.iconSize = 24.0,
+    this.labelFontSize = 10.0,
     this.itemSpacing = 8.0,
-    this.toolbarHeight = 60.0, // Default toolbar height, make it configurable
-  }) : items = items ?? [ // Use provided items or default
-    ToolbarItem(
-      icon: Icons.edit_outlined,
-      name: "pencil",
-      label: "Pencil",
-      onPressed: () {
-        print("Pencil pressed");
-      },
-    ),
-    ToolbarItem(
-      icon: Icons.brush_outlined,
-      name: "brush",
-      label: "Brush",
-      onPressed: () {
-        print("Brush pressed");
-      },
-    ),
-    ToolbarItem(
-      icon: Icons.highlight_alt_outlined,
-      name: "select",
-      label: "Select",
-      onPressed: () {
-        print("Select pressed");
-      },
-    ),
-  ];
+  });
 
   @override
   Widget build(BuildContext context) {
-    // Wrap the ListView in a Container with a specific height
+    // You can add selection logic here if needed, perhaps by comparing item.name
+    // with a value from a Provider or another state management solution.
+    // final bool isSelected = ... ;
+    // Color currentIconColor = isSelected ? Colors.blue : Theme.of(context).iconTheme.color ?? Colors.black;
+    // Color currentLabelColor = isSelected ? Colors.blue : Theme.of(context).textTheme.bodySmall?.color ?? Colors.black87;
+    Color currentIconColor = Theme.of(context).iconTheme.color ?? Colors.black;
+    Color currentLabelColor =
+        Theme.of(context).textTheme.bodySmall?.color ?? Colors.black87;
+
+    return Tooltip(
+      message: item.label ?? item.name,
+      child: InkWell(
+        onTap: item.onPressed,
+        borderRadius: BorderRadius.circular(4.0),
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: itemSpacing,
+            vertical: 4.0,
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min, // Important for fitting in the toolbar
+            children: [
+              Icon(
+                item.icon,
+                color: currentIconColor,
+                size: iconSize,
+              ),
+              if (item.label != null && item.label!.isNotEmpty) ...[
+                const SizedBox(height: 2.0),
+                Text(
+                  item.label!,
+                  style: TextStyle(
+                    fontSize: labelFontSize,
+                    color: currentLabelColor,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                ),
+              ]
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class Toolbar extends StatelessWidget {
+  final double itemSpacing;
+  final double toolbarHeight;
+  final List<Widget> children; // <<< ACCEPTS A LIST OF WIDGETS
+
+  const Toolbar({
+    super.key,
+    required this.children, // Now requires a list of widgets
+    this.itemSpacing = 16.0,
+    this.toolbarHeight = 60.0,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
-      height: toolbarHeight, // <<< APPLY THE HEIGHT HERE
-      // You might also want to set a background color for the toolbar area
-      // color: Theme.of(context).appBarTheme.backgroundColor ?? Colors.blueGrey,
+      height: toolbarHeight,
+      // color: Theme.of(context).appBarTheme.backgroundColor ?? Colors.blueGrey[100], // Example color
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface, // Or another appropriate color
+        border: Border( // Optional: add a bottom border like an AppBar
+          bottom: BorderSide(
+            color: Theme.of(context).dividerColor,
+            width: 0.5,
+          ),
+        ),
+      ),
       child: ListView.separated(
-        padding: EdgeInsets.symmetric(horizontal: itemSpacing / 2), // Overall padding for the list
+        padding: EdgeInsets.symmetric(
+            horizontal: itemSpacing), // Adjust padding as needed
         separatorBuilder: (BuildContext context, int index) {
           return SizedBox(width: itemSpacing);
         },
         scrollDirection: Axis.horizontal,
-        itemCount: items.length,
+        itemCount: children.length,
         itemBuilder: (BuildContext context, int index) {
-          final item = items[index];
-          // final toolManager = context.watch<ToolManager>(); // If you bring back selection
-          // final bool isSelected = item.name == toolManager.selectedToolName;
-
-          // You'll need to define iconSize, labelFontSize, and colors
-          // or pass them as parameters if you uncomment the styling.
-          const double iconSize = 24.0;
-          const double labelFontSize = 10.0;
-          // Color currentIconColor = isSelected ? Colors.blue : Colors.black;
-          // Color currentLabelColor = isSelected ? Colors.blue : Colors.black87;
-          Color currentIconColor = Theme.of(context).iconTheme.color ?? Colors.black;
-          Color currentLabelColor = Theme.of(context).textTheme.bodySmall?.color ?? Colors.black87;
-
-
-          return Tooltip(
-            message: item.label ?? item.name,
-            child: InkWell(
-              onTap: item.onPressed,
-              borderRadius: BorderRadius.circular(4.0),
-              child: Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: itemSpacing, // A bit more spacing for each item
-                  vertical: 4.0, // Reduce vertical padding if toolbarHeight is small
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      item.icon,
-                      color: currentIconColor, // Apply a color
-                      size: iconSize, // Apply a size
-                    ),
-                    if (item.label != null && item.label!.isNotEmpty) ...[
-                      const SizedBox(height: 2.0), // Smaller space
-                      Text(
-                        item.label!,
-                        style: TextStyle(
-                          fontSize: labelFontSize, // Apply a font size
-                          color: currentLabelColor, // Apply a color
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                        textAlign: TextAlign.center,
-                      ),
-                    ]
-                  ],
-                ),
-              ),
-            ),
-          );
+          // Each child is already a widget, so just return it.
+          // Wrap in a Center or Align if specific alignment within the toolbar height is needed.
+          return Center(child: children[index]);
         },
       ),
     );
