@@ -1,20 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // For input formatters
-import 'package:provider/provider.dart'; // Assuming you use Provider
-import 'package:warp_drive_weaver/features/designer/notifiers/wif_notifier.dart';
-import 'package:warp_drive_weaver/features/designer/notifiers/wif_object_section_notifiers/weaving_section_notifier.dart';
 
 class StepperControl extends StatefulWidget {
-  final int minValue;
-  final int maxValue;
-  // Optional: if you want to control button/text field size
-  final double itemSize;
+  final String label; // The label to display (e.g., "Treadle Count", "Shaft Count")
+  final int currentValue; // The current value to display and work with
+  final int minValue = 0;
+  final int maxValue = 99;
+  final VoidCallback? onIncrement; // Callback for + button
+  final VoidCallback? onDecrement; // Callback for - button
+  final ValueChanged<int> onValueChanged; // Callback for when text field value is submitted
+  final double itemSize = 20;
+  final bool isIncrementDisabled; // Optional: To control plus button state externally
+  final bool isDecrementDisabled; // Optional: To control minus button state externally
 
   const StepperControl({
     super.key,
-    this.minValue = 0,
-    this.maxValue = 99,
-    this.itemSize = 20.0, // Default size for buttons and text field height
+    required this.label,
+    required this.currentValue,
+    required this.onIncrement,
+    required this.onDecrement,
+    required this.onValueChanged,
+    this.isIncrementDisabled = false,
+    this.isDecrementDisabled = false,
   });
 
   @override
@@ -31,59 +38,60 @@ class _StepperControlState extends State<StepperControl> {
     _textController = TextEditingController();
     _focusNode = FocusNode();
 
-    // Initialize text field with the current value from the provider
-    // and listen for provider changes to update the text field.
-    final notifier = Provider.of<WifNotifier>(context, listen: false);
-    _textController.text = notifier.currentWif.weavingSection?.treadles.toString() ?? '0';
-
-    notifier.addListener(_handleNotifierChange);
-
+    _textController.text = widget.currentValue.toString();
     _focusNode.addListener(_onFocusChange);
   }
 
-  void _handleNotifierChange() {
-    if (!mounted) return;
-    final notifier = Provider.of<WifNotifier>(context, listen: false);
-    final notifierValueStr = notifier.currentWif.weavingSection?.treadles.toString() ?? '0';
-    if (_textController.text != notifierValueStr) {
-      _textController.text = notifierValueStr;
-      // Optionally move cursor to the end
-      _textController.selection = TextSelection.fromPosition(
-        TextPosition(offset: _textController.text.length),
-      );
+  // This lifecycle method is called when the widget's properties change.
+  // We need to update the text controller if the currentValue from the parent changes.
+  @override
+  void didUpdateWidget(StepperControl oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.currentValue != oldWidget.currentValue) {
+      // Only update if not currently focused, to avoid disrupting user input.
+      // Or, be more sophisticated if needed (e.g., if external change should always override).
+      if (!_focusNode.hasFocus) {
+        final currentValueStr = widget.currentValue.toString();
+        if (_textController.text != currentValueStr) {
+          _textController.text = currentValueStr;
+          _textController.selection = TextSelection.fromPosition(
+            TextPosition(offset: _textController.text.length),
+          );
+        }
+      }
     }
   }
 
   void _onFocusChange() {
     if (!mounted) return;
     if (!_focusNode.hasFocus) {
-      // When focus is lost, submit the current text field value
       _submitValueFromTextField();
     }
   }
 
   void _submitValueFromTextField() {
     if (!mounted) return;
-    final notifier = Provider.of<WifNotifier>(context, listen: false);
-    final wifNotifier = Provider.of<WifNotifier>(context, listen: false);
     final String currentText = _textController.text;
     int? newValue = int.tryParse(currentText);
 
     if (newValue != null) {
-      // Clamp the value to min/max if needed
       newValue = newValue.clamp(widget.minValue, widget.maxValue);
-      notifier.weavingSectionNotifier.setTreadleCount(newValue); // Update the provider
+      if (widget.onValueChanged != null) {
+        widget.onValueChanged!(newValue); // Call the provided callback
+      }
+      // The text field will update via didUpdateWidget when currentValue changes
     } else {
-      // If parsing fails, revert text field to current provider value
-      _textController.text = wifNotifier.currentWif.weavingSection?.treadles.toString() ?? '0';
+      // If parsing fails, revert text field to current widget value
+      _textController.text = widget.currentValue.toString();
     }
+    // Ensure selection is at the end after potential reversion
+    _textController.selection = TextSelection.fromPosition(
+      TextPosition(offset: _textController.text.length),
+    );
   }
 
   @override
   void dispose() {
-    // Clean up
-    final notifier = Provider.of<WifNotifier>(context, listen: false);
-    notifier.removeListener(_handleNotifierChange);
     _textController.dispose();
     _focusNode.removeListener(_onFocusChange);
     _focusNode.dispose();
@@ -92,76 +100,80 @@ class _StepperControlState extends State<StepperControl> {
 
   @override
   Widget build(BuildContext context) {
-    // Watch the provider for changes to update UI elements like button states
-    final notifier = context.watch<WifNotifier>();
-    final wifNotifier = context.watch<WifNotifier>();
+    // Determine button states based on props or currentValue
+    final bool actualDecrementDisabled = widget.isDecrementDisabled || widget.currentValue <= widget.minValue;
+    final bool actualIncrementDisabled = widget.isIncrementDisabled || widget.currentValue >= widget.maxValue;
 
     return Column(
-      children: [ Row(
-        mainAxisSize: MainAxisSize.min, // Keep it compact
-        children: [
-          // Minus Button
-          SizedBox(
-            width: widget.itemSize,
-            height: widget.itemSize,
-            child: IconButton(
-              padding: EdgeInsets.zero,
-              icon: const Icon(Icons.remove_circle_outline),
-              iconSize: widget.itemSize * 0.7,
-              tooltip: 'Decrement',
-              onPressed: (wifNotifier.currentWif.weavingSection?.treadles ?? widget.minValue) > widget.minValue
-                  ? () => notifier.weavingSectionNotifier.decrementTreadleCount()
-                  : null, // Disable if at min value
-            ),
-          ),
-          const SizedBox(width: 4), // Spacing
-
-          // Text Entry
-          SizedBox(
-            width: widget.itemSize * 1.5, // Make text field a bit wider
-            height: widget.itemSize,
-            child: TextFormField(
-              controller: _textController,
-              focusNode: _focusNode,
-              textAlign: TextAlign.center,
-              keyboardType: TextInputType.number,
-              inputFormatters: <TextInputFormatter>[
-                FilteringTextInputFormatter.digitsOnly,
-              ],
-              decoration: const InputDecoration(
-                isDense: true, // Makes it more compact
-                contentPadding: EdgeInsets.symmetric(vertical: 0.0), // Adjust padding
-                border: OutlineInputBorder(),
-              ),
-              onFieldSubmitted: (value) {
-                // Called when user presses "done" on keyboard
-                _submitValueFromTextField();
-              },
-            ),
-          ),
-          const SizedBox(width: 4), // Spacing
-
-          // Plus Button
-          SizedBox(
-            width: widget.itemSize,
-            height: widget.itemSize,
-            child: IconButton(
+      mainAxisSize: MainAxisSize.min, // Keep column compact
+      crossAxisAlignment: CrossAxisAlignment.center, // Center the label
+      children: [
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              width: widget.itemSize,
+              height: widget.itemSize,
+              child: IconButton(
                 padding: EdgeInsets.zero,
-                icon: const Icon(Icons.add_circle_outline),
-                iconSize: widget.itemSize * 0.7,
-                tooltip: 'Increment',
-                onPressed: (wifNotifier.currentWif.weavingSection?.treadles ?? widget.minValue) < widget.maxValue
-                    ? () => notifier.weavingSectionNotifier.incrementTreadleCount()
-                    : null
+                icon: const Icon(Icons.remove),
+                iconSize: widget.itemSize,
+                tooltip: 'Decrement ${widget.label}',
+                onPressed: actualDecrementDisabled ? null : widget.onDecrement,
+              ),
             ),
-          ),
-        ],
-      ),
-        const Text(
-          "Treadle Count",
-          style: TextStyle(fontSize: 12), // Adjust style as needed
+            const SizedBox(width: 0),
+            SizedBox(
+              width: widget.itemSize * 2.5,
+              height: widget.itemSize * 1.5, // You might need to adjust height if isDense changes visuals
+              child: TextFormField(
+                controller: _textController,
+                focusNode: _focusNode,
+                textAlign: TextAlign.center,
+                textAlignVertical: TextAlignVertical.center, // Good for centering text vertically
+                keyboardType: TextInputType.number,
+                inputFormatters: <TextInputFormatter>[
+                  FilteringTextInputFormatter.digitsOnly,
+                ],
+                decoration: const InputDecoration(
+                  isDense: true, // Make it compact, often better for borderless
+                  contentPadding: EdgeInsets.symmetric(vertical: 2.0, horizontal: 4.0), // Adjust padding as needed
+                  border: InputBorder.none,         // Removes the default border/underline
+                  focusedBorder: InputBorder.none,  // Removes border when field is focused
+                  enabledBorder: InputBorder.none,  // Removes border when field is enabled (and not focused)
+                  errorBorder: InputBorder.none,    // Removes border when field has an error
+                  disabledBorder: InputBorder.none, // Removes border when field is disabled
+                  // You might want to set a subtle background color if it's borderless
+                  // to make it visually distinct, or ensure its container provides contrast.
+                  // filled: true,
+                  // fillColor: Colors.grey[200],
+                ),
+                onFieldSubmitted: (value) {
+                  _submitValueFromTextField();
+                },
+                // Optional: Add a cursor color if the default is hard to see without a border
+                // cursorColor: Colors.blue,
+              ),
+            ),
+            const SizedBox(width: 0),
+            SizedBox(
+              width: widget.itemSize,
+              height: widget.itemSize,
+              child: IconButton(
+                padding: EdgeInsets.zero,
+                icon: const Icon(Icons.add),
+                iconSize: widget.itemSize,
+                tooltip: 'Increment ${widget.label}',
+                onPressed: actualIncrementDisabled ? null : widget.onIncrement,
+              ),
+            ),
+          ],
+        ),// Space between stepper and label
+        Text(
+          widget.label,
+          style: const TextStyle(fontSize: 12),
         ),
-      ]
-      );
+      ],
+    );
   }
 }

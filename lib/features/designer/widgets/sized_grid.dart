@@ -9,7 +9,7 @@ Widget sizedGrid({
   required int columnCount,
 }) {
   if (rowCount <= 0 || columnCount <= 0) {
-    return SizedBox.shrink(); // Or some placeholder for an empty grid
+    return const SizedBox.shrink(); // Or some placeholder for an empty grid
   }
 
   double totalGridWidth = (columnCount * globalCellWidth) +
@@ -33,7 +33,7 @@ Widget sizedGrid({
             mainAxisAlignment: MainAxisAlignment.spaceBetween, // Distributes cells, utilizing spacing
             children: List.generate(columnCount, (c) {
               // The cellBuilder provides the actual GridCellWidget or its content
-              return GridCell();
+              return const GridCell();
             }),
           );
         }),
